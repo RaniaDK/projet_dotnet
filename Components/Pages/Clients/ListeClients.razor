@@ -1,0 +1,79 @@
+@page "/clients"
+@using facturationA.Models
+@using facturationA.Services
+@inject IClientService ClientService
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+<h3 class="mb-4">👥 Clients</h3>
+
+<button class="btn btn-primary mb-3" @onclick='() => Nav.NavigateTo("/clients/nouveau")''>
+    + Nouveau client
+</button>
+
+@if (clients == null)
+{
+    <p>Chargement...</p>
+}
+else if (!clients.Any())
+{
+    <p class="text-muted">Aucun client enregistré.</p>
+}
+else
+{
+    <input class="form-control mb-3" placeholder="Rechercher..." 
+           @bind="recherche" @bind:event="oninput" />
+
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Factures</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var client in ClientsFiltres)
+            {
+                <tr>
+                    <td>@client.Nom</td>
+                    <td>@client.Email</td>
+                    <td>@client.Telephone</td>
+                    <td>@client.Factures.Count</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1"
+                                @onclick='() => Nav.NavigateTo($"/clients/{client.Id}")''>
+                            ✏️ Modifier
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger"
+                                @onclick="() => Supprimer(client.Id)">
+                            🗑️ Supprimer
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Client>? clients;
+    private string recherche = "";
+
+    private IEnumerable<Client> ClientsFiltres => clients?
+        .Where(c => string.IsNullOrEmpty(recherche) ||
+                    c.Nom.Contains(recherche, StringComparison.OrdinalIgnoreCase) ||
+                    c.Email.Contains(recherche, StringComparison.OrdinalIgnoreCase))
+        ?? Enumerable.Empty<Client>();
+
+    protected override async Task OnInitializedAsync()
+        => clients = await ClientService.GetAllAsync();
+
+    private async Task Supprimer(int id)
+    {
+        await ClientService.DeleteAsync(id);
+        clients = await ClientService.GetAllAsync();
+    }
+}

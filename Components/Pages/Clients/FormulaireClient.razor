@@ -1,0 +1,65 @@
+@page "/clients/nouveau"
+@page "/clients/{Id:int}"
+@using facturationA.Services
+@using facturationA.Models
+@inject IClientService ClientService
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+<h3>@(Id == null ? "Nouveau client" : "Modifier le client")</h3>
+
+<EditForm Model="client" OnValidSubmit="Sauvegarder">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="text-danger" />
+
+    <div class="mb-3">
+        <label class="form-label">Nom *</label>
+        <InputText class="form-control" @bind-Value="client.Nom" />
+        <ValidationMessage For="() => client.Nom" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email *</label>
+        <InputText class="form-control" @bind-Value="client.Email" />
+        <ValidationMessage For="() => client.Email" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Téléphone</label>
+        <InputText class="form-control" @bind-Value="client.Telephone" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Adresse</label>
+        <InputTextArea class="form-control" rows="2" @bind-Value="client.Adresse" />
+    </div>
+
+    <button type="submit" class="btn btn-success me-2">💾 Sauvegarder</button>
+    <button type="button" class="btn btn-secondary" 
+            @onclick='() => Nav.NavigateTo("/Clients")''>Annuler</button>
+</EditForm>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private Client client = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            var existing = await ClientService.GetByIdAsync(Id.Value);
+            if (existing != null) client = existing;
+        }
+    }
+
+    private async Task Sauvegarder()
+    {
+        if (Id.HasValue)
+            await ClientService.UpdateAsync(client);
+        else
+            await ClientService.CreateAsync(client);
+
+        Nav.NavigateTo("/clients");
+    }
+}
