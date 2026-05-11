@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -36,5 +37,19 @@ namespace facturationA.Models
 
         [NotMapped]
         public decimal TotalTTC => TotalHT + TotalTVA;
+=======
+namespace FacturationApp.Models
+{
+    public class LigneFacture
+    {
+        public Produit Produit { get; set; }
+        public int Quantite { get; set; }
+
+        public decimal TotalHT => Produit.PrixHT * Quantite;
+
+        public decimal TVA => TotalHT * Produit.TauxTVA;
+
+        public decimal TotalTTC => TotalHT + TVA;
+>>>>>>> b53ad5ad37452948838beaaa6285fffeeb34b40b
     }
 }
