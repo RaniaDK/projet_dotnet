@@ -1,0 +1,309 @@
+@page "/dashboard"
+@using facturationApp.Models
+@using facturationApp.Services
+@inject IFactureService FactureService
+@inject IClientService ClientService
+@inject IProduitService ProduitService
+@rendermode InteractiveServer
+
+<h3 class="mb-4">📊 Tableau de bord analytique</h3>
+
+@if (factures == null)
+{
+    <p>Chargement...</p>
+}
+else
+{
+    <!-- KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h6 class="card-title">CA Total HT</h6>
+                    <h4>@caHT.ToString("F3") TND</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h6 class="card-title">CA Total TTC</h6>
+                    <h4>@caTTC.ToString("F3") TND</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h6 class="card-title">TVA Collectée</h6>
+                    <h4>@totalTVA.ToString("F3") TND</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h6 class="card-title">Total Timbres</h6>
+                    <h4>@totalTimbre.ToString("F3") TND</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-dark">
+                <div class="card-body">
+                    <h6 class="card-title">Nb Factures</h6>
+                    <h4>@factures.Count</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h6 class="card-title">Nb Clients</h6>
+                    <h4>@nbClients</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-secondary">
+                <div class="card-body">
+                    <h6 class="card-title">Nb Produits</h6>
+                    <h4>@nbProduits</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white" style="background:#6f42c1">
+                <div class="card-body">
+                    <h6 class="card-title">Moy. Facture TTC</h6>
+                    <h4>@moyFacture.ToString("F3") TND</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <!-- CA par client -->
+        <div class="col-md-6">
+            <div class="card p-3">
+                <h5>👤 CA par client (TTC)</h5>
+                <table class="table table-sm table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Client</th>
+                            <th>CA TTC</th>
+                            <th>Nb Factures</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in caParClient)
+                        {
+                            <tr>
+                                <td>@item.Nom</td>
+                                <td>@item.CaTTC.ToString("F3") TND</td>
+                                <td>@item.NbFactures</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TVA par taux -->
+        <div class="col-md-6">
+            <div class="card p-3">
+                <h5>🏦 TVA collectée par taux</h5>
+                <table class="table table-sm table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Taux TVA</th>
+                            <th>Base HT</th>
+                            <th>TVA collectée</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in tvaParTaux)
+                        {
+                            <tr>
+                                <td>@item.Taux %</td>
+                                <td>@item.BaseHT.ToString("F3") TND</td>
+                                <td>@item.MontantTVA.ToString("F3") TND</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Produit le plus vendu -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card p-3">
+                <h5>📦 Produits les plus vendus</h5>
+                <table class="table table-sm table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Produit</th>
+                            <th>Qté vendue</th>
+                            <th>CA HT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in produitsVendus)
+                        {
+                            <tr>
+                                <td>@item.Designation</td>
+                                <td>@item.QteTotale</td>
+                                <td>@item.CaHT.ToString("F3") TND</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CA par mois -->
+        <div class="col-md-6">
+            <div class="card p-3">
+                <h5>📅 CA mensuel (année @DateTime.Today.Year)</h5>
+                <table class="table table-sm table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Mois</th>
+                            <th>CA HT</th>
+                            <th>CA TTC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in caMensuel)
+                        {
+                            <tr>
+                                <td>@item.Mois</td>
+                                <td>@item.CaHT.ToString("F3") TND</td>
+                                <td>@item.CaTTC.ToString("F3") TND</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Facture>? factures;
+    private int nbClients;
+    private int nbProduits;
+    private decimal caHT;
+    private decimal caTTC;
+    private decimal totalTVA;
+    private decimal totalTimbre;
+    private decimal moyFacture;
+
+    private List<CaClientDto> caParClient = new();
+    private List<TvaParTauxDto> tvaParTaux = new();
+    private List<ProduitVenduDto> produitsVendus = new();
+    private List<CaMensuelDto> caMensuel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        factures = await FactureService.GetAllAsync();
+        nbClients = (await ClientService.GetAllAsync()).Count;
+        nbProduits = (await ProduitService.GetAllAsync()).Count;
+
+        // KPIs
+        caHT = factures.Sum(f => f.TotalHT);
+        caTTC = factures.Sum(f => f.TotalTTC);
+        totalTVA = factures.Sum(f => f.TotalTVA);
+        totalTimbre = factures.Sum(f => f.TimbreFiscal);
+        moyFacture = factures.Any() ? factures.Average(f => f.TotalTTC) : 0;
+
+        // CA par client
+        caParClient = factures
+            .GroupBy(f => f.Client?.Nom ?? "Inconnu")
+            .Select(g => new CaClientDto
+            {
+                Nom = g.Key,
+                CaTTC = g.Sum(f => f.TotalTTC),
+                NbFactures = g.Count()
+            })
+            .OrderByDescending(x => x.CaTTC)
+            .ToList();
+
+        // TVA par taux
+        tvaParTaux = factures
+            .SelectMany<Facture, LigneFacture>(f => f.Lignes)
+            .GroupBy(l => l.TauxTVA)
+            .Select(g => new TvaParTauxDto
+            {
+                Taux = g.Key,
+                BaseHT = g.Sum(l => l.TotalHT),
+                MontantTVA = g.Sum(l => l.TotalTVA)
+            })
+            .OrderBy(x => x.Taux)
+            .ToList();
+
+        // Produits vendus
+        produitsVendus = factures
+            .SelectMany<Facture, LigneFacture>(f => f.Lignes)
+            .GroupBy(l => l.Produit?.Designation ?? "Inconnu")
+            .Select(g => new ProduitVenduDto
+            {
+                Designation = g.Key,
+                QteTotale = g.Sum(l => l.Quantite),
+                CaHT = g.Sum(l => l.TotalHT)
+            })
+            .OrderByDescending(x => x.QteTotale)
+            .Take(10)
+            .ToList();
+
+        // CA mensuel
+        var moisNoms = new[] { "", "Jan", "Fév", "Mar", "Avr", "Mai", "Jun",
+                                "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc" };
+        caMensuel = factures
+            .Where(f => f.DateFacture.Year == DateTime.Today.Year)
+            .GroupBy(f => f.DateFacture.Month)
+            .Select(g => new CaMensuelDto
+            {
+                Mois = moisNoms[g.Key],
+                CaHT = g.Sum(f => f.TotalHT),
+                CaTTC = g.Sum(f => f.TotalTTC)
+            })
+            .OrderBy(x => Array.IndexOf(moisNoms, x.Mois))
+            .ToList();
+    }
+
+    // DTOs internes
+    private class CaClientDto
+    {
+        public string Nom { get; set; } = "";
+        public decimal CaTTC { get; set; }
+        public int NbFactures { get; set; }
+    }
+
+    private class TvaParTauxDto
+    {
+        public decimal Taux { get; set; }
+        public decimal BaseHT { get; set; }
+        public decimal MontantTVA { get; set; }
+    }
+
+    private class ProduitVenduDto
+    {
+        public string Designation { get; set; } = "";
+        public int QteTotale { get; set; }
+        public decimal CaHT { get; set; }
+    }
+
+    private class CaMensuelDto
+    {
+        public string Mois { get; set; } = "";
+        public decimal CaHT { get; set; }
+        public decimal CaTTC { get; set; }
+    }
+}

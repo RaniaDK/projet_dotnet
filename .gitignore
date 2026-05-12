@@ -1,0 +1,39 @@
+# Build artifacts
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# Visual Studio Code
+.vscode/
+
+# Logs
+*.log
+
+# NuGet
+*.nupkg
+packages/
+.nuget/
+
+# ASP.NET
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Optional npm/node
+node_modules/
+
+# VS/VSCode temporary files
+*.tmp
+*.temp
+
+# published output
+publish/
