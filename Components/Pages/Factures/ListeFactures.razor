@@ -1,0 +1,114 @@
+@page "/factures"
+@using facturationApp.Models
+@using facturationApp.Services
+@inject IFactureService FactureService
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+<h3 class="mb-4">🧾 Gestion des Factures</h3>
+
+<button class="btn btn-primary mb-3"
+        @onclick='() => Nav.NavigateTo("/factures/nouveau")'>
+    + Nouvelle facture
+</button>
+
+@if (factures == null)
+{
+    <p>Chargement...</p>
+}
+else if (!factures.Any())
+{
+    <div class="alert alert-info">Aucune facture enregistrée.</div>
+}
+else
+{
+    <table class="table table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Numéro</th>
+                <th>Date</th>
+                <th>Client</th>
+                <th>Total HT</th>
+                <th>TVA</th>
+                <th>Timbre</th>
+                <th>Total TTC</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var f in factures)
+            {
+                <tr>
+                    <td><strong>@f.Numero</strong></td>
+                    <td>@f.DateFacture.ToString("dd/MM/yyyy")</td>
+                    <td>@f.Client?.Nom</td>
+                    <td>@f.TotalHT.ToString("F3") TND</td>
+                    <td>@f.TotalTVA.ToString("F3") TND</td>
+                    <td>@f.TimbreFiscal.ToString("F3") TND</td>
+                    <td><strong>@f.TotalTTC.ToString("F3") TND</strong></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-info me-1"
+                                @onclick='() => Nav.NavigateTo("/factures/" + f.Id)'>
+                            
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger"
+                                @onclick='() => ConfirmerSuppression(f)'>
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot class="table-secondary fw-bold">
+            <tr>
+                <td colspan="3">TOTAL</td>
+                <td>@factures.Sum(f => f.TotalHT).ToString("F3") TND</td>
+                <td>@factures.Sum(f => f.TotalTVA).ToString("F3") TND</td>
+                <td>@factures.Sum(f => f.TimbreFiscal).ToString("F3") TND</td>
+                <td>@factures.Sum(f => f.TotalTTC).ToString("F3") TND</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+}
+
+@if (factureASupprimer is not null)
+{
+    <div class="modal d-block" style="background:rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmer la suppression</h5>
+                </div>
+                <div class="modal-body">
+                    Supprimer la facture <strong>@factureASupprimer.Numero</strong> ?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" @onclick='() => Supprimer()'>Supprimer</button>
+                    <button class="btn btn-secondary"
+                            @onclick='() => { factureASupprimer = null; }'>Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Facture>? factures;
+    private Facture? factureASupprimer;
+
+    protected override async Task OnInitializedAsync()
+        => factures = await FactureService.GetAllAsync();
+
+    private void ConfirmerSuppression(Facture f) => factureASupprimer = f;
+
+    private async Task Supprimer()
+    {
+        if (factureASupprimer is not null)
+        {
+            await FactureService.DeleteAsync(factureASupprimer.Id);
+            factures = await FactureService.GetAllAsync();
+            factureASupprimer = null;
+        }
+    }
+}
