@@ -1,0 +1,224 @@
+@page "/fiscal"
+@using facturationApp.Models
+@using facturationApp.Services
+@inject IFactureService FactureService
+@rendermode InteractiveServer
+
+<h3 class="mb-4">🏦 Tableau de bord fiscal</h3>
+
+@if (factures == null)
+{
+    <p>Chargement...</p>
+}
+else
+{
+    <!-- Résumé fiscal -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-danger p-3">
+                <h6 class="opacity-75">TVA Totale Collectée</h6>
+                <h3 class="fw-bold">@totalTVA.ToString("F3") TND</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning p-3">
+                <h6 class="opacity-75">Total Timbres Fiscaux</h6>
+                <h3 class="fw-bold">@totalTimbre.ToString("F3") TND</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-dark p-3">
+                <h6 class="opacity-75">Charges Fiscales Totales</h6>
+                <h3 class="fw-bold">@(totalTVA + totalTimbre).ToString("F3") TND</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- TVA par taux détaillée -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card p-3">
+                <h5>📊 Répartition TVA par taux</h5>
+                <table class="table table-sm table-hover mt-2">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Taux</th>
+                            <th>Nb Lignes</th>
+                            <th>Base HT</th>
+                            <th>TVA</th>
+                            <th>% du total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in tvaParTaux)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-primary">@item.Taux %</span>
+                                </td>
+                                <td>@item.NbLignes</td>
+                                <td>@item.BaseHT.ToString("F3") TND</td>
+                                <td>@item.MontantTVA.ToString("F3") TND</td>
+                                <td>
+                                    <div class="progress" style="height:6px; min-width:80px">
+                                        <div class="progress-bar bg-danger"
+                                             style="width:@item.Pourcentage%"></div>
+                                    </div>
+                                    <small>@item.Pourcentage.ToString("F1") %</small>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-secondary fw-bold">
+                        <tr>
+                            <td colspan="2">TOTAL</td>
+                            <td>@tvaParTaux.Sum(x => x.BaseHT).ToString("F3") TND</td>
+                            <td>@tvaParTaux.Sum(x => x.MontantTVA).ToString("F3") TND</td>
+                            <td>100 %</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Timbres par mois -->
+        <div class="col-md-6">
+            <div class="card p-3">
+                <h5>📅 Timbres fiscaux par mois</h5>
+                <table class="table table-sm table-hover mt-2">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Mois</th>
+                            <th>Nb Factures</th>
+                            <th>Total Timbres</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in timbreParMois)
+                        {
+                            <tr>
+                                <td>@item.Mois</td>
+                                <td>@item.NbFactures</td>
+                                <td>@item.TotalTimbre.ToString("F3") TND</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-secondary fw-bold">
+                        <tr>
+                            <td>TOTAL</td>
+                            <td>@timbreParMois.Sum(x => x.NbFactures)</td>
+                            <td>@timbreParMois.Sum(x => x.TotalTimbre).ToString("F3") TND</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Déclaration fiscale simulée -->
+    <div class="card p-4 border-danger">
+        <h5 class="text-danger">📋 Récapitulatif fiscal — @DateTime.Today.Year</h5>
+        <table class="table table-bordered mt-2">
+            <tbody>
+                <tr>
+                    <td class="fw-bold">Chiffre d'affaires HT</td>
+                    <td>@caHT.ToString("F3") TND</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">TVA collectée (taux 19%)</td>
+                    <td>@tvaParTaux.FirstOrDefault(x => x.Taux == 19)?.MontantTVA.ToString("F3") TND</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">TVA collectée (taux 13%)</td>
+                    <td>@tvaParTaux.FirstOrDefault(x => x.Taux == 13)?.MontantTVA.ToString("F3") TND</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">TVA collectée (taux 7%)</td>
+                    <td>@tvaParTaux.FirstOrDefault(x => x.Taux == 7)?.MontantTVA.ToString("F3") TND</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Ventes exonérées (0%)</td>
+                    <td>@tvaParTaux.FirstOrDefault(x => x.Taux == 0)?.BaseHT.ToString("F3") TND</td>
+                </tr>
+                <tr class="table-danger">
+                    <td class="fw-bold">TVA TOTALE À DÉCLARER</td>
+                    <td class="fw-bold fs-5">@totalTVA.ToString("F3") TND</td>
+                </tr>
+                <tr class="table-warning">
+                    <td class="fw-bold">TIMBRE FISCAL TOTAL</td>
+                    <td class="fw-bold fs-5">@totalTimbre.ToString("F3") TND</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<Facture>? factures;
+    private decimal totalTVA;
+    private decimal totalTimbre;
+    private decimal caHT;
+
+    private List<TvaDto> tvaParTaux = new();
+    private List<TimbreDto> timbreParMois = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        factures = await FactureService.GetAllAsync();
+        if (factures == null) return;
+
+        caHT = factures.Sum(f => f.TotalHT);
+        totalTVA = factures.Sum(f => f.TotalTVA);
+        totalTimbre = factures.Sum(f => f.TimbreFiscal);
+
+        // TVA par taux avec pourcentage
+        var tvaLignes = factures.SelectMany(f => f.Lignes).ToList();
+        tvaParTaux = tvaLignes
+            .GroupBy(l => l.TauxTVA)
+            .Select(g => new TvaDto
+            {
+                Taux = g.Key,
+                NbLignes = g.Count(),
+                BaseHT = g.Sum(l => l.TotalHT),
+                MontantTVA = g.Sum(l => l.TotalTVA),
+                Pourcentage = totalTVA > 0
+                    ? (double)(g.Sum(l => l.TotalTVA) / totalTVA * 100)
+                    : 0
+            })
+            .OrderByDescending(x => x.Taux)
+            .ToList();
+
+        // Timbres par mois
+        var moisNoms = new[] { "", "Jan", "Fév", "Mar", "Avr", "Mai", "Jun",
+                                "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc" };
+        timbreParMois = factures
+            .Where(f => f.DateFacture.Year == DateTime.Today.Year)
+            .GroupBy(f => f.DateFacture.Month)
+            .Select(g => new TimbreDto
+            {
+                Mois = moisNoms[g.Key],
+                NumMois = g.Key,
+                NbFactures = g.Count(),
+                TotalTimbre = g.Sum(f => f.TimbreFiscal)
+            })
+            .OrderBy(x => x.NumMois)
+            .ToList();
+    }
+
+    private class TvaDto
+    {
+        public decimal Taux { get; set; }
+        public int NbLignes { get; set; }
+        public decimal BaseHT { get; set; }
+        public decimal MontantTVA { get; set; }
+        public double Pourcentage { get; set; }
+    }
+
+    private class TimbreDto
+    {
+        public string Mois { get; set; } = "";
+        public int NumMois { get; set; }
+        public int NbFactures { get; set; }
+        public decimal TotalTimbre { get; set; }
+    }
+}

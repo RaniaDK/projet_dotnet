@@ -6,8 +6,13 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        <div class="top-row px-4 d-flex align-items-center justify-content-end gap-3">
+            <span class="text-muted" style="font-size:0.82rem;">
+                <i class="bi bi-calendar3 me-1"></i>@DateTime.Now.ToString("dd MMM yyyy")
+            </span>
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank" class="text-decoration-none">
+                <i class="bi bi-question-circle me-1"></i>Aide
+            </a>
         </div>
 
         <article class="content px-4">
@@ -17,7 +22,9 @@
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    Une erreur inattendue s'est produite.
+    <a href="." class="reload ms-2 fw-semibold">Recharger</a>
+    <span class="dismiss">✕</span>
 </div>
+learn.microsoft.com

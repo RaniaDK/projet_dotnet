@@ -14,7 +14,7 @@ namespace facturationApp.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Facture → Client (cascade delete désactivé)
+            // Facture → Client
             modelBuilder.Entity<Facture>()
                 .HasOne(f => f.Client)
                 .WithMany(c => c.Factures)
@@ -39,9 +39,23 @@ namespace facturationApp.Data
             modelBuilder.Entity<Facture>()
                 .HasIndex(f => f.Numero)
                 .IsUnique();
+
+            // Précision décimales
             modelBuilder.Entity<Produit>()
                 .Property(p => p.TauxTVA)
                 .HasPrecision(5, 2);
+
+            modelBuilder.Entity<LigneFacture>()
+                .Property(l => l.TauxTVA)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<LigneFacture>()
+                .Property(l => l.PrixUnitaireHT)
+                .HasPrecision(10, 3);
+
+            modelBuilder.Entity<Facture>()
+                .Property(f => f.TimbreFiscal)
+                .HasPrecision(10, 3);
         }
     }
 }

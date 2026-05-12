@@ -4,6 +4,8 @@
 @inject IFactureService FactureService
 @inject NavigationManager Nav
 @rendermode InteractiveServer
+@inject PdfFactureService PdfService
+@inject IJSRuntime JS
 
 <h3 class="mb-4">🧾 Gestion des Factures</h3>
 
@@ -49,7 +51,11 @@ else
                     <td>
                         <button class="btn btn-sm btn-outline-info me-1"
                                 @onclick='() => Nav.NavigateTo("/factures/" + f.Id)'>
-                            
+                            ✏️
+                        </button>
+                        <button class="btn btn-sm btn-outline-success me-1"
+                                @onclick="() => TelechargerPdf(f)">
+                            📄
                         </button>
                         <button class="btn btn-sm btn-outline-danger"
                                 @onclick='() => ConfirmerSuppression(f)'>
@@ -110,5 +116,14 @@ else
             factures = await FactureService.GetAllAsync();
             factureASupprimer = null;
         }
+    }
+
+    private async Task TelechargerPdf(Facture facture)
+    {
+        var pdfBytes = PdfService.GenererPdf(facture);
+        var base64 = Convert.ToBase64String(pdfBytes);
+        var fileName = $"Facture_{facture.Numero}.pdf";
+        
+        await JS.InvokeVoidAsync("downloadFile", base64, fileName, "application/pdf");
     }
 }
