@@ -1,65 +1,109 @@
-@page "/clients/nouveau"
-@page "/clients/{Id:int}"
-@using facturationA.Services
-@using facturationA.Models
+@page "/clients"
+@using facturationApp.Services
 @inject IClientService ClientService
+@using facturationApp.Models
 @inject NavigationManager Nav
 @rendermode InteractiveServer
 
-<h3>@(Id == null ? "Nouveau client" : "Modifier le client")</h3>
+<h3 class="mb-4">👥 Gestion des Clients</h3>
 
-<EditForm Model="client" OnValidSubmit="Sauvegarder">
-    <DataAnnotationsValidator />
-    <ValidationSummary class="text-danger" />
+<button class="btn btn-primary mb-3" @onclick='() => Nav.NavigateTo("/clients/nouveau")'>
+    + Nouveau client
+</button>
 
-    <div class="mb-3">
-        <label class="form-label">Nom *</label>
-        <InputText class="form-control" @bind-Value="client.Nom" />
-        <ValidationMessage For="() => client.Nom" />
+@if (clients == null)
+{
+    <p>Chargement...</p>
+}
+else if (!clients.Any())
+{
+    <div class="alert alert-info">Aucun client enregistré.</div>
+}
+else
+{
+    <input class="form-control mb-3" placeholder="🔍 Rechercher par nom ou email..."
+           @bind="recherche" @bind:event="oninput" />
+
+    <table class="table table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Nb Factures</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var client in ClientsFiltres)
+            {
+                <tr>
+                    <td>@client.Id</td>
+                    <td>@client.Nom</td>
+                    <td>@client.Email</td>
+                    <td>@(client.Telephone ?? "-")</td>
+                    <td>@client.Factures.Count</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1"
+                                @onclick='() => Nav.NavigateTo($"/clients/" + client.Id)'>
+                            ✏️
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger"
+                                @onclick="() => ConfirmerSuppression(client)">
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+   </table>
+}
+
+@if (clientASupprimer != null)
+{
+    <div class="modal d-block" style="background:rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmer la suppression</h5>
+                </div>
+                <div class="modal-body">
+                    Supprimer le client <strong>@clientASupprimer.Nom</strong> ?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" @onclick="Supprimer">Supprimer</button>
+                    <button class="btn btn-secondary" @onclick="() => clientASupprimer = null">Annuler</button>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Email *</label>
-        <InputText class="form-control" @bind-Value="client.Email" />
-        <ValidationMessage For="() => client.Email" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Téléphone</label>
-        <InputText class="form-control" @bind-Value="client.Telephone" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Adresse</label>
-        <InputTextArea class="form-control" rows="2" @bind-Value="client.Adresse" />
-    </div>
-
-    <button type="submit" class="btn btn-success me-2">💾 Sauvegarder</button>
-    <button type="button" class="btn btn-secondary" 
-            @onclick='() => Nav.NavigateTo("/Clients")''>Annuler</button>
-</EditForm>
+}
 
 @code {
-    [Parameter] public int? Id { get; set; }
+    private List<Client>? clients;
+    private string recherche = "";
+    private Client? clientASupprimer;
 
-    private Client client = new();
+    private IEnumerable<Client> ClientsFiltres => clients?
+        .Where(c => string.IsNullOrEmpty(recherche) ||
+                    c.Nom.Contains(recherche, StringComparison.OrdinalIgnoreCase) ||
+                    c.Email.Contains(recherche, StringComparison.OrdinalIgnoreCase))
+        ?? Enumerable.Empty<Client>();
 
     protected override async Task OnInitializedAsync()
+        => clients = await ClientService.GetAllAsync();
+
+    private void ConfirmerSuppression(Client client)
+        => clientASupprimer = client;
+
+    private async Task Supprimer()
     {
-        if (Id.HasValue)
+        if (clientASupprimer != null)
         {
-            var existing = await ClientService.GetByIdAsync(Id.Value);
-            if (existing != null) client = existing;
+            await ClientService.DeleteAsync(clientASupprimer.Id);
+            clients = await ClientService.GetAllAsync();
+            clientASupprimer = null;
         }
-    }
-
-    private async Task Sauvegarder()
-    {
-        if (Id.HasValue)
-            await ClientService.UpdateAsync(client);
-        else
-            await ClientService.CreateAsync(client);
-
-        Nav.NavigateTo("/clients");
     }
 }

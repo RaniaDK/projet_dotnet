@@ -1,7 +1,7 @@
-using facturationA.Models;
+using facturationApp.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace facturationA.Data
+namespace facturationApp.Data
 {
     public class AppDbContext : DbContext
     {

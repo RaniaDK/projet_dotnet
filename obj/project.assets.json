@@ -2,7 +2,6 @@
   "version": 3,
   "targets": {
     "net10.0": {
-<<<<<<< HEAD
       "Humanizer.Core/2.14.1": {
         "type": "package",
         "compile": {
@@ -17,9 +16,6 @@
         }
       },
       "Microsoft.AspNetCore.App.Internal.Assets/10.0.5": {
-=======
-      "Microsoft.AspNetCore.App.Internal.Assets/10.0.2": {
->>>>>>> b53ad5ad37452948838beaaa6285fffeeb34b40b
         "type": "package",
         "build": {
           "build/Microsoft.AspNetCore.App.Internal.Assets.props": {},
@@ -28,7 +24,6 @@
         "buildMultiTargeting": {
           "buildMultiTargeting/Microsoft.AspNetCore.App.Internal.Assets.targets": {}
         }
-<<<<<<< HEAD
       },
       "Microsoft.Build.Framework/18.0.2": {
         "type": "package",
@@ -819,13 +814,10 @@
         "build": {
           "buildTransitive/net8.0/_._": {}
         }
-=======
->>>>>>> b53ad5ad37452948838beaaa6285fffeeb34b40b
       }
     }
   },
   "libraries": {
-<<<<<<< HEAD
     "Humanizer.Core/2.14.1": {
       "sha512": "lQKvtaTDOXnoVJ20ibTuSIOf2i0uO0MPbDhd1jm238I+U/2ZnRENj0cktKZhtchBMtCUSRQ5v4xBCUbKNmyVMw==",
       "type": "package",
@@ -848,12 +840,6 @@
       "sha512": "Oxw9Ps1/nd6c/EMCAI13AeJFEqXezAvCEOshMjUWmL7LeGirHJNzytR2e/3jINYg0j2TmPvNUowGHf+gp8zDSQ==",
       "type": "package",
       "path": "microsoft.aspnetcore.app.internal.assets/10.0.5",
-=======
-    "Microsoft.AspNetCore.App.Internal.Assets/10.0.2": {
-      "sha512": "fMAqrUm+aspxRAsCJ6Hlgs96XSHwNIr9HBNt7wyBAzQkPlfE7w+0C4NzDoJnso5YZyDI0VcRtEXxG9odt3KiZA==",
-      "type": "package",
-      "path": "microsoft.aspnetcore.app.internal.assets/10.0.2",
->>>>>>> b53ad5ad37452948838beaaa6285fffeeb34b40b
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -869,7 +855,6 @@
         "build/Microsoft.AspNetCore.App.Internal.Assets.targets",
         "buildMultiTargeting/Microsoft.AspNetCore.App.Internal.Assets.targets",
         "buildTransitive/Microsoft.AspNetCore.App.Internal.Assets.targets",
-<<<<<<< HEAD
         "microsoft.aspnetcore.app.internal.assets.10.0.5.nupkg.sha512",
         "microsoft.aspnetcore.app.internal.assets.nuspec"
       ]
@@ -2476,16 +2461,10 @@
         "system.composition.typedparts.nuspec",
         "useSharedDesignerContext.txt"
       ]
-=======
-        "microsoft.aspnetcore.app.internal.assets.10.0.2.nupkg.sha512",
-        "microsoft.aspnetcore.app.internal.assets.nuspec"
-      ]
->>>>>>> b53ad5ad37452948838beaaa6285fffeeb34b40b
     }
   },
   "projectFileDependencyGroups": {
     "net10.0": [
-<<<<<<< HEAD
       "Microsoft.AspNetCore.App.Internal.Assets >= 10.0.5",
       "Microsoft.EntityFrameworkCore.Design >= 10.0.7",
       "Microsoft.EntityFrameworkCore.Sqlite >= 10.0.7",
@@ -2494,36 +2473,18 @@
   },
   "packageFolders": {
     "C:\\Users\\DELL\\.nuget\\packages\\": {}
-=======
-      "Microsoft.AspNetCore.App.Internal.Assets >= 10.0.2"
-    ]
-  },
-  "packageFolders": {
-    "C:\\Users\\User1\\.nuget\\packages\\": {}
->>>>>>> b53ad5ad37452948838beaaa6285fffeeb34b40b
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-<<<<<<< HEAD
-      "projectUniqueName": "C:\\Users\\DELL\\facturationA\\facturationA.csproj",
-      "projectName": "facturationA",
-      "projectPath": "C:\\Users\\DELL\\facturationA\\facturationA.csproj",
+      "projectUniqueName": "C:\\Users\\DELL\\Desktop\\facturationApp\\facturationApp.csproj",
+      "projectName": "facturationApp",
+      "projectPath": "C:\\Users\\DELL\\Desktop\\facturationApp\\facturationApp.csproj",
       "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\DELL\\facturationA\\obj\\",
+      "outputPath": "C:\\Users\\DELL\\Desktop\\facturationApp\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\DELL\\AppData\\Roaming\\NuGet\\NuGet.Config"
-=======
-      "projectUniqueName": "C:\\Users\\User1\\Desktop\\facturationApp\\facturationApp.csproj",
-      "projectName": "facturationApp",
-      "projectPath": "C:\\Users\\User1\\Desktop\\facturationApp\\facturationApp.csproj",
-      "packagesPath": "C:\\Users\\User1\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\User1\\Desktop\\facturationApp\\obj\\",
-      "projectStyle": "PackageReference",
-      "configFilePaths": [
-        "C:\\Users\\User1\\AppData\\Roaming\\NuGet\\NuGet.Config"
->>>>>>> b53ad5ad37452948838beaaa6285fffeeb34b40b
       ],
       "originalTargetFrameworks": [
         "net10.0"
@@ -2547,11 +2508,7 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-<<<<<<< HEAD
       "SdkAnalysisLevel": "10.0.200"
-=======
-      "SdkAnalysisLevel": "10.0.100"
->>>>>>> b53ad5ad37452948838beaaa6285fffeeb34b40b
     },
     "frameworks": {
       "net10.0": {
@@ -2560,7 +2517,6 @@
           "Microsoft.AspNetCore.App.Internal.Assets": {
             "suppressParent": "All",
             "target": "Package",
-<<<<<<< HEAD
             "version": "[10.0.5, )",
             "autoReferenced": true
           },
@@ -2579,10 +2535,6 @@
             "suppressParent": "All",
             "target": "Package",
             "version": "[10.0.7, )"
-=======
-            "version": "[10.0.2, )",
-            "autoReferenced": true
->>>>>>> b53ad5ad37452948838beaaa6285fffeeb34b40b
           }
         },
         "imports": [
@@ -2604,11 +2556,7 @@
             "privateAssets": "all"
           }
         },
-<<<<<<< HEAD
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
-=======
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
->>>>>>> b53ad5ad37452948838beaaa6285fffeeb34b40b
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

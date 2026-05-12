@@ -1,0 +1,75 @@
+@page "/produits/nouveau"
+@page "/produits/{Id:int}"
+@using facturationApp.Models
+@using facturationApp.Services
+@inject IProduitService ProduitService
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+<h3>@(Id == null ? "➕ Nouveau produit" : "✏️ Modifier le produit")</h3>
+
+<div class="card p-4" style="max-width:500px">
+    <EditForm Model="produit" OnValidSubmit="Sauvegarder">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger" />
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Désignation *</label>
+            <InputText class="form-control" @bind-Value="produit.Designation" />
+            <ValidationMessage For="() => produit.Designation" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Prix HT (TND) *</label>
+            <InputNumber class="form-control" @bind-Value="produit.PrixHT" />
+            <ValidationMessage For="() => produit.PrixHT" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Taux TVA *</label>
+            <InputSelect class="form-select" @bind-Value="produit.TauxTVA">
+                <option value="0">0% (Exonéré)</option>
+                <option value="7">7%</option>
+                <option value="13">13%</option>
+                <option value="19">19%</option>
+            </InputSelect>
+        </div>
+
+        @if (produit.PrixHT > 0)
+        {
+            <div class="alert alert-info">
+                Prix TTC : <strong>@produit.PrixTTC.ToString("F3") TND</strong>
+            </div>
+        }
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">💾 Sauvegarder</button>
+            <button type="button" class="btn btn-secondary"
+                    @onclick='() => Nav.NavigateTo("/produits")'>Annuler</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+    private Produit produit = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            var existing = await ProduitService.GetByIdAsync(Id.Value);
+            if (existing != null) produit = existing;
+        }
+    }
+
+    private async Task Sauvegarder()
+    {
+        if (Id.HasValue)
+            await ProduitService.UpdateAsync(produit);
+        else
+            await ProduitService.CreateAsync(produit);
+
+        Nav.NavigateTo("/produits");
+    }
+}

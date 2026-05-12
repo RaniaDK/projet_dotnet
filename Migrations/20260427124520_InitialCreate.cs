@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace facturationA.Migrations
+namespace facturationApp.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

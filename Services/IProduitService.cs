@@ -1,6 +1,6 @@
-using facturationA.Models;
+using facturationApp.Models;
 
-namespace facturationA.Services
+namespace facturationApp.Services
 {
     public interface IProduitService
     {

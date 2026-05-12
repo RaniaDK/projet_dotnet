@@ -1,0 +1,99 @@
+@page "/produits"
+@using facturationApp.Services
+@using facturationApp.Models
+@inject IProduitService ProduitService
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+<h3 class="mb-4">📦 Gestion des Produits</h3>
+
+<button class="btn btn-primary mb-3" @onclick='() => Nav.NavigateTo("/produits/nouveau")'>
+    + Nouveau produit
+</button>
+
+@if (produits == null)
+{
+    <p>Chargement...</p>
+}
+else
+{
+    <input class="form-control mb-3" placeholder="🔍 Rechercher..."
+           @bind="recherche" @bind:event="oninput" />
+
+    <table class="table table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Désignation</th>
+                <th>Prix HT</th>
+                <th>TVA (%)</th>
+                <th>Prix TTC</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in ProduitsFiltres)
+            {
+                <tr>
+                    <td>@p.Designation</td>
+                    <td>@p.PrixHT.ToString("F3") TND</td>
+                    <td>@p.TauxTVA %</td>
+                    <td>@p.PrixTTC.ToString("F3") TND</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1"
+                                @onclick='() => Nav.NavigateTo($"/produits/" + p.Id)'>
+                            ✏️
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger"
+                                @onclick='() => ConfirmerSuppression(p)'>
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (produitASupprimer is not null)
+{
+    <div class="modal d-block" style="background:rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5>Confirmer la suppression</h5></div>
+                <div class="modal-body">
+                    Supprimer <strong>@produitASupprimer?.Designation</strong> ?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" @onclick="Supprimer">Supprimer</button>
+                    <button class="btn btn-secondary" @onclick="() => produitASupprimer = null">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Produit>? produits;
+    private string recherche = "";
+    private Produit? produitASupprimer;
+
+    private IEnumerable<Produit> ProduitsFiltres => produits?
+        .Where(p => string.IsNullOrEmpty(recherche) ||
+                    p.Designation.Contains(recherche, StringComparison.OrdinalIgnoreCase))
+        ?? Enumerable.Empty<Produit>();
+
+    protected override async Task OnInitializedAsync()
+        => produits = await ProduitService.GetAllAsync();
+
+    private void ConfirmerSuppression(Produit p) => produitASupprimer = p;
+
+    private async Task Supprimer()
+    {
+        if (produitASupprimer is not null)
+        {
+            await ProduitService.DeleteAsync(produitASupprimer.Id);
+            produits = await ProduitService.GetAllAsync();
+            produitASupprimer = null;
+        }
+    }
+}

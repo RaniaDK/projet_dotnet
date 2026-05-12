@@ -1,8 +1,8 @@
-using facturationA.Data;
-using facturationA.Models;
+using facturationApp.Data;
+using facturationApp.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace facturationA.Services
+namespace facturationApp.Services
 {
     public class ProduitService : IProduitService
     {

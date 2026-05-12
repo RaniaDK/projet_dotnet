@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using facturationA.Data;
+using facturationApp.Data;
 
 #nullable disable
 
-namespace facturationA.Migrations
+namespace facturationApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260427124520_InitialCreate")]
@@ -20,7 +20,7 @@ namespace facturationA.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.7");
 
-            modelBuilder.Entity("facturationA.Models.Client", b =>
+            modelBuilder.Entity("facturationApp.Models.Client", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -47,7 +47,7 @@ namespace facturationA.Migrations
                     b.ToTable("Clients");
                 });
 
-            modelBuilder.Entity("facturationA.Models.Facture", b =>
+            modelBuilder.Entity("facturationApp.Models.Facture", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -76,7 +76,7 @@ namespace facturationA.Migrations
                     b.ToTable("Factures");
                 });
 
-            modelBuilder.Entity("facturationA.Models.LigneFacture", b =>
+            modelBuilder.Entity("facturationApp.Models.LigneFacture", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -106,7 +106,7 @@ namespace facturationA.Migrations
                     b.ToTable("LignesFacture");
                 });
 
-            modelBuilder.Entity("facturationA.Models.Produit", b =>
+            modelBuilder.Entity("facturationApp.Models.Produit", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -129,9 +129,9 @@ namespace facturationA.Migrations
                     b.ToTable("Produits");
                 });
 
-            modelBuilder.Entity("facturationA.Models.Facture", b =>
+            modelBuilder.Entity("facturationApp.Models.Facture", b =>
                 {
-                    b.HasOne("facturationA.Models.Client", "Client")
+                    b.HasOne("facturationApp.Models.Client", "Client")
                         .WithMany("Factures")
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -140,15 +140,15 @@ namespace facturationA.Migrations
                     b.Navigation("Client");
                 });
 
-            modelBuilder.Entity("facturationA.Models.LigneFacture", b =>
+            modelBuilder.Entity("facturationApp.Models.LigneFacture", b =>
                 {
-                    b.HasOne("facturationA.Models.Facture", "Facture")
+                    b.HasOne("facturationApp.Models.Facture", "Facture")
                         .WithMany("Lignes")
                         .HasForeignKey("FactureId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("facturationA.Models.Produit", "Produit")
+                    b.HasOne("facturationApp.Models.Produit", "Produit")
                         .WithMany("LignesFacture")
                         .HasForeignKey("ProduitId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -159,17 +159,17 @@ namespace facturationA.Migrations
                     b.Navigation("Produit");
                 });
 
-            modelBuilder.Entity("facturationA.Models.Client", b =>
+            modelBuilder.Entity("facturationApp.Models.Client", b =>
                 {
                     b.Navigation("Factures");
                 });
 
-            modelBuilder.Entity("facturationA.Models.Facture", b =>
+            modelBuilder.Entity("facturationApp.Models.Facture", b =>
                 {
                     b.Navigation("Lignes");
                 });
 
-            modelBuilder.Entity("facturationA.Models.Produit", b =>
+            modelBuilder.Entity("facturationApp.Models.Produit", b =>
                 {
                     b.Navigation("LignesFacture");
                 });

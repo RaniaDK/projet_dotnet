@@ -1,16 +1,11 @@
-<<<<<<< HEAD
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace facturationA.Models
-=======
-namespace FacturationApp.Models
->>>>>>> b53ad5ad37452948838beaaa6285fffeeb34b40b
+namespace facturationApp.Models
 {
     public class Produit
     {
         public int Id { get; set; }
-<<<<<<< HEAD
 
         [Required(ErrorMessage = "La désignation est obligatoire")]
         [StringLength(150)]
@@ -23,18 +18,11 @@ namespace FacturationApp.Models
 
         [Required]
         [Range(0, 100, ErrorMessage = "Taux TVA invalide")]
-        public decimal TauxTVA { get; set; } // ex: 19, 7, 0
+        public decimal TauxTVA { get; set; }
 
-        // Propriété calculée
         [NotMapped]
         public decimal PrixTTC => PrixHT * (1 + TauxTVA / 100);
 
-        // Navigation
         public ICollection<LigneFacture> LignesFacture { get; set; } = new List<LigneFacture>();
-=======
-        public string Nom { get; set; }
-        public decimal PrixHT { get; set; }
-        public decimal TauxTVA { get; set; }
->>>>>>> b53ad5ad37452948838beaaa6285fffeeb34b40b
     }
 }
