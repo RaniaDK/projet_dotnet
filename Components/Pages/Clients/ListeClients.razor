@@ -1,74 +1,180 @@
-@page "/clients/nouveau"
-@page "/clients/{Id:int}"
-@using facturationApp.Models
+@page "/clients"
 @using facturationApp.Services
+@using facturationApp.Models
 @inject IClientService ClientService
 @inject NavigationManager Nav
 @rendermode InteractiveServer
 
-<h3>@(Id == null ? "➕ Nouveau client" : "✏️ Modifier le client")</h3>
+<h3 class="mb-4">👥 Gestion des Clients</h3>
 
-@if (message != null)
+<button class="btn btn-primary mb-3"
+        @onclick='() => Nav.NavigateTo("/clients/nouveau")'>
+    <i class="bi bi-person-plus me-1"></i> Nouveau client
+</button>
+
+@if (clients == null)
 {
-    <div class="alert alert-success">@message</div>
+    <div class="d-flex align-items-center gap-2">
+        <div class="spinner-border spinner-border-sm text-primary"></div>
+        <span>Chargement...</span>
+    </div>
+}
+else if (!clients.Any())
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>Aucun client enregistré.
+    </div>
+}
+else
+{
+    <div class="row g-2 mb-3 align-items-center">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input class="form-control"
+                       placeholder="Rechercher par nom, email ou MF..."
+                       @bind="recherche"
+                       @bind:event="oninput" />
+                @if (!string.IsNullOrEmpty(recherche))
+                {
+                    <button class="btn btn-outline-secondary"
+                            @onclick="() => recherche =    string.Empty">"">
+                        ✕
+                    </button>
+                }
+            </div>
+        </div>
+        <div class="col-md-6 text-end text-muted">
+            <small>@ClientsFiltres.Count() client(s) trouvé(s)</small>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Nom</th>
+                    <th>Matricule Fiscal</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Adresse</th>
+                    <th class="text-center">Nb Factures</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var client in ClientsFiltres)
+                {
+                    <tr>
+                        <td class="text-muted">@client.Id</td>
+                        <td><strong>@client.Nom</strong></td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(client.MatriculeFiscal))
+                            {
+                                <span class="badge bg-danger">
+                                    @client.MatriculeFiscal
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+                        <td>@client.Email</td>
+                        <td>@(client.Telephone ?? "—")</td>
+                        <td>@(client.Adresse ?? "—")</td>
+                        <td class="text-center">
+                            <span class="badge bg-primary rounded-pill">
+                                @client.Factures.Count
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary me-1"
+                                    title="Modifier"
+                                    @onclick='() => Nav.NavigateTo("/clients/" + client.Id)'>
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    title="Supprimer"
+                                    @onclick="() => ConfirmerSuppression(client)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
-<div class="card p-4" style="max-width:600px">
-    <EditForm Model="client" OnValidSubmit="Sauvegarder">
-        <DataAnnotationsValidator />
-        <ValidationSummary class="text-danger" />
-
-        <div class="mb-3">
-            <label class="form-label fw-bold">Nom *</label>
-            <InputText class="form-control" @bind-Value="client.Nom" />
-            <ValidationMessage For="() => client.Nom" />
+@if (clientASupprimer != null)
+{
+    <div class="modal d-block" style="background:rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Confirmer la suppression
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p>Voulez-vous supprimer le client :</p>
+                    <p class="fw-bold fs-5">@clientASupprimer.Nom</p>
+                    @if (clientASupprimer.Factures.Count > 0)
+                    {
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Ce client a <strong>@clientASupprimer.Factures.Count
+                            facture(s)</strong> associée(s) !
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary"
+                            @onclick="() => clientASupprimer = null">
+                        <i class="bi bi-x me-1"></i> Annuler
+                    </button>
+                    <button class="btn btn-danger"
+                            @onclick="Supprimer">
+                        <i class="bi bi-trash me-1"></i> Supprimer
+                    </button>
+                </div>
+            </div>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label fw-bold">Email *</label>
-            <InputText class="form-control" @bind-Value="client.Email" />
-            <ValidationMessage For="() => client.Email" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label fw-bold">Téléphone</label>
-            <InputText class="form-control" @bind-Value="client.Telephone" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label fw-bold">Adresse</label>
-            <InputTextArea class="form-control" rows="2" @bind-Value="client.Adresse" />
-        </div>
-
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-success">💾 Sauvegarder</button>
-            <button type="button" class="btn btn-secondary"
-                    @onclick='() => Nav.NavigateTo("/clients")'>Annuler</button>
-        </div>
-    </EditForm>
-</div>
+    </div>
+}
 
 @code {
-    [Parameter] public int? Id { get; set; }
-    private Client client = new();
-    private string? message;
+    private List<Client>? clients;
+    private string recherche = "";
+    private Client? clientASupprimer;
+
+    private IEnumerable<Client> ClientsFiltres => clients?
+        .Where(c => string.IsNullOrEmpty(recherche) ||
+                    c.Nom.Contains(recherche, StringComparison.OrdinalIgnoreCase) ||
+                    c.Email.Contains(recherche, StringComparison.OrdinalIgnoreCase) ||
+                    (c.MatriculeFiscal != null &&
+                     c.MatriculeFiscal.Contains(recherche,
+                         StringComparison.OrdinalIgnoreCase)))
+        ?? Enumerable.Empty<Client>();
 
     protected override async Task OnInitializedAsync()
+        => clients = await ClientService.GetAllAsync();
+
+    private void ConfirmerSuppression(Client client)
+        => clientASupprimer = client;
+
+    private async Task Supprimer()
     {
-        if (Id.HasValue)
+        if (clientASupprimer != null)
         {
-            var existing = await ClientService.GetByIdAsync(Id.Value);
-            if (existing != null) client = existing;
+            await ClientService.DeleteAsync(clientASupprimer.Id);
+            clients = await ClientService.GetAllAsync();
+            clientASupprimer = null;
         }
-    }
-
-    private async Task Sauvegarder()
-    {
-        if (Id.HasValue)
-            await ClientService.UpdateAsync(client);
-        else
-            await ClientService.CreateAsync(client);
-
-        Nav.NavigateTo("/clients");
     }
 }

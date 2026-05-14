@@ -14,7 +14,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IProduitService, ProduitService>();
 builder.Services.AddScoped<IFactureService, FactureService>();
+
+// IEntrepriseService AVANT PdfFactureService
+builder.Services.AddScoped<IEntrepriseService, EntrepriseService>();
 builder.Services.AddScoped<PdfFactureService>();
+
 builder.Services.AddScoped<DataSeeder>();
 
 var app = builder.Build();
@@ -31,6 +35,7 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
 // Seed données de démonstration
 using (var scope = app.Services.CreateScope())
 {
@@ -39,4 +44,5 @@ using (var scope = app.Services.CreateScope())
     await db.Database.MigrateAsync();
     await seeder.SeedAsync();
 }
+
 app.Run();

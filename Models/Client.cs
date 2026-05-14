@@ -19,7 +19,8 @@ namespace facturationApp.Models
 
         [StringLength(200)]
         public string? Adresse { get; set; }
-
+        [StringLength(20)]
+        public string? MatriculeFiscal { get; set; }
         public ICollection<Facture> Factures { get; set; } = new List<Facture>();
     }
 }

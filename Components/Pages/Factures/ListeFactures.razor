@@ -2,98 +2,131 @@
 @using facturationApp.Models
 @using facturationApp.Services
 @inject IFactureService FactureService
-@inject NavigationManager Nav
-@rendermode InteractiveServer
 @inject PdfFactureService PdfService
 @inject IJSRuntime JS
+@inject NavigationManager Nav
+@rendermode InteractiveServer
 
 <h3 class="mb-4">🧾 Gestion des Factures</h3>
 
 <button class="btn btn-primary mb-3"
         @onclick='() => Nav.NavigateTo("/factures/nouveau")'>
-    + Nouvelle facture
+    <i class="bi bi-plus-circle me-1"></i> Nouvelle facture
 </button>
 
 @if (factures == null)
 {
-    <p>Chargement...</p>
+    <div class="d-flex align-items-center gap-2">
+        <div class="spinner-border spinner-border-sm text-primary"></div>
+        <span>Chargement...</span>
+    </div>
 }
 else if (!factures.Any())
 {
-    <div class="alert alert-info">Aucune facture enregistrée.</div>
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>Aucune facture enregistrée.
+    </div>
 }
 else
 {
-    <table class="table table-hover table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>Numéro</th>
-                <th>Date</th>
-                <th>Client</th>
-                <th>Total HT</th>
-                <th>TVA</th>
-                <th>Timbre</th>
-                <th>Total TTC</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var f in factures)
-            {
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle">
+            <thead class="table-dark">
                 <tr>
-                    <td><strong>@f.Numero</strong></td>
-                    <td>@f.DateFacture.ToString("dd/MM/yyyy")</td>
-                    <td>@f.Client?.Nom</td>
-                    <td>@f.TotalHT.ToString("F3") TND</td>
-                    <td>@f.TotalTVA.ToString("F3") TND</td>
-                    <td>@f.TimbreFiscal.ToString("F3") TND</td>
-                    <td><strong>@f.TotalTTC.ToString("F3") TND</strong></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-info me-1"
-                                @onclick='() => Nav.NavigateTo("/factures/" + f.Id)'>
-                            ✏️
-                        </button>
-                        <button class="btn btn-sm btn-outline-success me-1"
-                                @onclick="() => TelechargerPdf(f)">
-                            📄
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger"
-                                @onclick='() => ConfirmerSuppression(f)'>
-                            🗑️
-                        </button>
-                    </td>
+                    <th>Numéro</th>
+                    <th>Date</th>
+                    <th>Client</th>
+                    <th>Total HT</th>
+                    <th>TVA</th>
+                    <th>Timbre</th>
+                    <th>Total TTC</th>
+                    <th class="text-center">Actions</th>
                 </tr>
-            }
-        </tbody>
-        <tfoot class="table-secondary fw-bold">
-            <tr>
-                <td colspan="3">TOTAL</td>
-                <td>@factures.Sum(f => f.TotalHT).ToString("F3") TND</td>
-                <td>@factures.Sum(f => f.TotalTVA).ToString("F3") TND</td>
-                <td>@factures.Sum(f => f.TimbreFiscal).ToString("F3") TND</td>
-                <td>@factures.Sum(f => f.TotalTTC).ToString("F3") TND</td>
-                <td></td>
-            </tr>
-        </tfoot>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var f in factures)
+                {
+                    <tr>
+                        <td><strong>@f.Numero</strong></td>
+                        <td>@f.DateFacture.ToString("dd/MM/yyyy")</td>
+                        <td>@f.Client?.Nom</td>
+                        <td>@f.TotalHT.ToString("F3") TND</td>
+                        <td>@f.TotalTVA.ToString("F3") TND</td>
+                        <td>@f.TimbreFiscal.ToString("F3") TND</td>
+                        <td><strong>@f.TotalTTC.ToString("F3") TND</strong></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary me-1"
+                                    title="Voir / Modifier"
+                                    @onclick='() => Nav.NavigateTo("/factures/" + f.Id)'>
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-success me-1"
+                                    title="Télécharger PDF"
+                                    @onclick="() => TelechargerPdf(f)">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    title="Supprimer"
+                                    @onclick="() => ConfirmerSuppression(f)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot class="table-secondary fw-bold">
+                <tr>
+                    <td colspan="3">TOTAL</td>
+                    <td>@factures.Sum(f => f.TotalHT).ToString("F3") TND</td>
+                    <td>@factures.Sum(f => f.TotalTVA).ToString("F3") TND</td>
+                    <td>@factures.Sum(f => f.TimbreFiscal).ToString("F3") TND</td>
+                    <td>@factures.Sum(f => f.TotalTTC).ToString("F3") TND</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 }
 
 @if (factureASupprimer is not null)
 {
     <div class="modal d-block" style="background:rgba(0,0,0,0.5)">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmer la suppression</h5>
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Confirmer la suppression
+                    </h5>
                 </div>
                 <div class="modal-body">
-                    Supprimer la facture <strong>@factureASupprimer.Numero</strong> ?
+                    Supprimer la facture
+                    <strong>@factureASupprimer.Numero</strong> ?
+                    <br />
+                    <small class="text-muted">Cette action est irréversible.</small>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-danger" @onclick='() => Supprimer()'>Supprimer</button>
                     <button class="btn btn-secondary"
-                            @onclick='() => { factureASupprimer = null; }'>Annuler</button>
+                            @onclick="() => factureASupprimer = null">
+                        <i class="bi bi-x me-1"></i> Annuler
+                    </button>
+                    <button class="btn btn-danger"
+                            @onclick="Supprimer">
+                        <i class="bi bi-trash me-1"></i> Supprimer
+                    </button>
                 </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (pdfEnCours)
+{
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+        <div class="toast show bg-white shadow">
+            <div class="toast-body d-flex align-items-center gap-2">
+                <div class="spinner-border spinner-border-sm text-success"></div>
+                Génération du PDF en cours...
             </div>
         </div>
     </div>
@@ -102,11 +135,13 @@ else
 @code {
     private List<Facture>? factures;
     private Facture? factureASupprimer;
+    private bool pdfEnCours = false;
 
     protected override async Task OnInitializedAsync()
         => factures = await FactureService.GetAllAsync();
 
-    private void ConfirmerSuppression(Facture f) => factureASupprimer = f;
+    private void ConfirmerSuppression(Facture f)
+        => factureASupprimer = f;
 
     private async Task Supprimer()
     {
@@ -119,11 +154,31 @@ else
     }
 
     private async Task TelechargerPdf(Facture facture)
+{
+    try
     {
-        var pdfBytes = PdfService.GenererPdf(facture);
-        var base64 = Convert.ToBase64String(pdfBytes);
-        var fileName = $"Facture_{facture.Numero}.pdf";
+        pdfEnCours = true;
+        StateHasChanged();
+
+        // Recharger la facture complète avec toutes les relations
+        var factureComplete = await FactureService.GetByIdAsync(facture.Id);
         
-        await JS.InvokeVoidAsync("downloadFile", base64, fileName, "application/pdf");
+        if (factureComplete == null)
+        {
+            return;
+        }
+
+        var pdfBytes = await PdfService.GenererPdfAsync(factureComplete);
+        var base64 = Convert.ToBase64String(pdfBytes);
+        var fileName = $"Facture_{factureComplete.Numero}.pdf";
+
+        await JS.InvokeVoidAsync("downloadFile", base64, fileName,
+            "application/pdf");
+    }
+    finally
+    {
+        pdfEnCours = false;
+        StateHasChanged();
     }
 }
+}   

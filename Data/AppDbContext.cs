@@ -11,7 +11,7 @@ namespace facturationApp.Data
         public DbSet<Produit> Produits { get; set; }
         public DbSet<Facture> Factures { get; set; }
         public DbSet<LigneFacture> LignesFacture { get; set; }
-
+        public DbSet<Entreprise> Entreprises { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Facture → Client

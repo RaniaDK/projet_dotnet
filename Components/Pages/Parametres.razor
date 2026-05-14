@@ -1,0 +1,153 @@
+@page "/parametres"
+@using facturationApp.Models
+@using facturationApp.Services
+@inject IEntrepriseService EntrepriseService
+@rendermode InteractiveServer
+
+<h3 class="mb-4">⚙️ Paramètres de l'entreprise</h3>
+
+@if (entreprise == null)
+{
+    <p>Chargement...</p>
+}
+else
+{
+    @if (message != null)
+    {
+        <div class="alert alert-success alert-auto-close">
+            <i class="bi bi-check-circle me-2"></i>@message
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card p-4">
+                <EditForm Model="entreprise" OnValidSubmit="Sauvegarder">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-building me-1"></i>Nom de l'entreprise *
+                        </label>
+                        <InputText class="form-control"
+                                   @bind-Value="entreprise.Nom"
+                                   placeholder="ex: TUNISIE GESTION SARL" />
+                        <ValidationMessage For="() => entreprise.Nom" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-file-text me-1"></i>Matricule Fiscal
+                        </label>
+                        <InputText class="form-control"
+                                   @bind-Value="entreprise.MatriculeFiscal"
+                                   placeholder="ex: 1234567/A/M/000" />
+                        <div class="form-text">Format : XXXXXXX/A/M/000</div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-geo-alt me-1"></i>Adresse
+                            </label>
+                            <InputText class="form-control"
+                                       @bind-Value="entreprise.Adresse"
+                                       placeholder="Rue, numéro..." />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Code Postal</label>
+                            <InputText class="form-control"
+                                       @bind-Value="entreprise.CodePostal"
+                                       placeholder="1001" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ville</label>
+                        <InputText class="form-control"
+                                   @bind-Value="entreprise.Ville"
+                                   placeholder="ex: Tunis" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-telephone me-1"></i>Téléphone
+                        </label>
+                        <InputText class="form-control"
+                                   @bind-Value="entreprise.Telephone"
+                                   placeholder="+216 XX XXX XXX" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-envelope me-1"></i>Email
+                        </label>
+                        <InputText class="form-control"
+                                   @bind-Value="entreprise.Email"
+                                   placeholder="contact@entreprise.tn" />
+                    </div>
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-floppy me-1"></i> Sauvegarder
+                    </button>
+                </EditForm>
+            </div>
+        </div>
+
+        <!-- Aperçu PDF -->
+        <div class="col-md-5">
+            <div class="card p-4 border-primary">
+                <h5 class="text-primary mb-3">
+                    <i class="bi bi-eye me-2"></i>Aperçu en-tête facture
+                </h5>
+                <div style="border-bottom: 2px solid #1a237e; padding-bottom: 15px;">
+                    <strong style="color:#1a237e; font-size:1.2rem">
+                        @entreprise.Nom
+                    </strong><br />
+                    <small>
+                        Adresse : @entreprise.Adresse
+                        @if (!string.IsNullOrEmpty(entreprise.CodePostal))
+                        { <text>, @entreprise.CodePostal</text> }
+                        @if (!string.IsNullOrEmpty(entreprise.Ville))
+                        { <text> @entreprise.Ville</text> }
+                    </small><br />
+                    <small>Tél : @entreprise.Telephone</small><br />
+                    @if (!string.IsNullOrEmpty(entreprise.Email))
+                    {
+                        <small>Email : @entreprise.Email</small><br />
+                    }
+                    @if (!string.IsNullOrEmpty(entreprise.MatriculeFiscal))
+                    {
+                        <small>
+                            <strong>MF : @entreprise.MatriculeFiscal</strong>
+                        </small>
+                    }
+                </div>
+                <div class="mt-3 text-muted" style="font-size:0.8rem">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Cet aperçu reflète exactement ce qui apparaîtra sur vos factures PDF.
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private Entreprise? entreprise;
+    private string? message;
+
+    protected override async Task OnInitializedAsync()
+        => entreprise = await EntrepriseService.GetAsync();
+
+    private async Task Sauvegarder()
+    {
+        if (entreprise != null)
+        {
+            await EntrepriseService.SaveAsync(entreprise);
+            message = "Paramètres sauvegardés avec succès !";
+            await Task.Delay(3000);
+            message = null;
+        }
+    }
+}
